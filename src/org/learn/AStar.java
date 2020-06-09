@@ -1,6 +1,5 @@
 package org.learn;
 
-import java.time.Year;
 import java.util.*;
 
 public class AStar {
@@ -13,12 +12,13 @@ public class AStar {
                 {1, 1, 1, 0, 1, 1, 1, 0, 1, 0},
                 {1, 0, 1, 1, 1, 1, 0, 1, 0, 0},
                 {1, 0, 0, 0, 0, 1, 0, 0, 0, 1},
-                {1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
+                {1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 0, 0, 0, 1, 0, 0, 1}
         };
 
         Cell source = new Cell(0, 0);
-        Cell destination = new Cell(9, 8);
+//        Cell destination = new Cell(8, 9);
+        Cell destination = new Cell(3, 2);
         aStar(grid, source, destination);
     }
 
@@ -27,7 +27,7 @@ public class AStar {
         List<Cell> closedList = new ArrayList<>();
         openList.add(source);
         Map<Cell, Cell> cameFrom = new HashMap<>();
-        source.setG(0);
+        source.setG(0d);
         source.setH(heuristics(source, destination));
         source.setF(source.getG() + source.getH());
         Cell current = null;
@@ -35,78 +35,120 @@ public class AStar {
             current = findLowestFScoreFromOpenList(openList);
             if (current.equals(destination)) {
                 //Reconstruct the path
-                break;
+                String finalPath = printPath(cameFrom, current);
+                System.out.println("finalPath: " + finalPath);
+                return;
             } else {
                 openList.remove(current);
+                closedList.add(current);
                 //Find all neighbours of 'current'
-                List<Cell> neighbours = findAllNeighbours(current, grid);
-                for(Cell neighbour: neighbours) {
+                List<Cell> neighbours = findUnvisitedNeighbours(current, grid, closedList);
+                for (Cell neighbour : neighbours) {
+                    Double distance = distanceBetweenNeighbours(current, neighbour);
+                    Double tentativeGScore = current.getG() + distance;
+                    if (tentativeGScore < neighbour.getG()) {
+                        cameFrom.put(neighbour, current);
+                        neighbour.setG(tentativeGScore);
+                        neighbour.setF(neighbour.getG() + heuristics(neighbour, destination));
+                        if (!openList.contains(neighbour)) {
+                            openList.add(neighbour);
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("No path found");
+    }
 
+    private static String printPath(Map<Cell, Cell> cameFrom, Cell current) {
+        String fullPath = "[" + current.getX() + ", " + current.getY() + "]";
+        while (cameFrom.containsKey(current)) {
+            current = cameFrom.get(current);
+            fullPath = "[" + current.getX() + ", " + current.getY() + "]" + fullPath;
+        }
+        return fullPath;
+    }
+
+    private static Double distanceBetweenNeighbours(Cell current, Cell neighbour) {
+        Integer x = Math.abs(current.getX() - neighbour.getX());
+        Integer y = Math.abs(current.getY() - neighbour.getY());
+        if (x == 1 && y == 1) {
+            return 1.4;
+        } else {
+            return 1d;
+        }
+    }
+
+    private static List<Cell> findUnvisitedNeighbours(Cell cell, int[][] grid, List<Cell> closedList) {
+        List<Cell> neighbours = new ArrayList<>();
+        Integer newX = null, newY = null;
+        if (cell.getX() + 1 < grid.length) {
+            newX = cell.getX() + 1;
+        }
+        if (cell.getY() + 1 < grid[cell.getX()].length) {
+            newY = cell.getY() + 1;
+        }
+        populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
+        newX = null;
+        newY = null;
+        if (cell.getX() - 1 >= 0) {
+            newX = cell.getX() - 1;
+        }
+        if (cell.getY() - 1 >= 0) {
+            newY = cell.getY() - 1;
+        }
+        populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
+        newX = null;
+        newY = null;
+        if (cell.getX() + 1 < grid.length) {
+            newX = cell.getX() + 1;
+        }
+        if (cell.getY() - 1 >= 0) {
+            newY = cell.getY() - 1;
+        }
+        populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
+        newX = null;
+        newY = null;
+        if (cell.getX() - 1 >= 0) {
+            newX = cell.getX() - 1;
+        }
+        if (cell.getY() + 1 < grid[cell.getX()].length) {
+            newY = cell.getY() + 1;
+        }
+        populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
+        return neighbours;
+    }
+
+    private static void populateNeighbours(Cell cell, List<Cell> neighbours, Integer newX, Integer newY, List<Cell> closedList, int[][] grid) {
+        if (null != newX) {
+            if (null != newY) {
+                Cell neighbour = new Cell(newX, newY, getGridValue(grid, newX, newY));
+                if (!closedList.contains(neighbour) && neighbour.getValue() == 1) {
+                    neighbours.add(neighbour);
+                }
+            } else {
+                Cell neighbour = new Cell(newX, cell.getY(), getGridValue(grid, newX, cell.getY()));
+                if (!closedList.contains(neighbour) && neighbour.getValue() == 1) {
+                    neighbours.add(neighbour);
+                }
+            }
+        } else {
+            if (null != newY) {
+                Cell neighbour = new Cell(cell.getX(), newY, getGridValue(grid, cell.getX(), newY));
+                if (!closedList.contains(neighbour) && neighbour.getValue() == 1) {
+                    neighbours.add(neighbour);
                 }
             }
         }
     }
 
-    private static List<Cell> findAllNeighbours(Cell cell, int [][] grid) {
-        List<Cell> neighbours = new ArrayList<>();
-        Integer newX = null, newY = null;
-        if(cell.getX() + 1 < grid.length) {
-            newX = cell.getX() + 1;
-        }
-        if(cell.getY() + 1 < grid[cell.getX()].length) {
-            newY = cell.getY() + 1;
-        }
-        populateNeighbours(cell, neighbours, newX, newY);
-        newX = null;
-        newY = null;
-        if(cell.getX() - 1 >= 0) {
-            newX = cell.getX() - 1;
-        }
-        if(cell.getY() - 1 >= 0) {
-            newY = cell.getY() - 1;
-        }
-        populateNeighbours(cell, neighbours, newX, newY);
-        newX = null;
-        newY = null;
-        if(cell.getX() + 1 < grid.length) {
-            newX = cell.getX() + 1;
-        }
-        if(cell.getY() - 1 >= 0) {
-            newY = cell.getY() - 1;
-        }
-        populateNeighbours(cell, neighbours, newX, newY);
-        newX = null;
-        newY = null;
-        if(cell.getX() - 1 >= 0) {
-            newX = cell.getX() - 1;
-        }
-        if(cell.getY() + 1 < grid[cell.getX()].length) {
-            newY = cell.getY() + 1;
-        }
-        populateNeighbours(cell, (List<Cell>) neighbours, newX, newY);
-        return neighbours;
-    }
-
-    private static void populateNeighbours(Cell cell, List<Cell> neighbours, Integer newX, Integer newY) {
-        if (null != newX) {
-            if (null != newY) {
-                Cell neighbour = new Cell(newX, newY);
-                neighbours.add(neighbour);
-            } else {
-                Cell neighbour = new Cell(newX, cell.getY());
-                neighbours.add(neighbour);
-            }
-        } else {
-            if (null != newY) {
-                Cell neighbour = new Cell(cell.getX(), newY);
-                neighbours.add(neighbour);
-            }
-        }
+    private static int getGridValue(int[][] grid, Integer x, Integer y) {
+        return grid[x][y];
     }
 
     private static Cell findLowestFScoreFromOpenList(List<Cell> openList) {
         Cell lowestFScoreCell = null;
-        int lowestFScore = Integer.MAX_VALUE;
+        Double lowestFScore = Double.MAX_VALUE;
         for (Cell cell : openList) {
             if (cell.getF() < lowestFScore) {
                 lowestFScore = cell.getF();
@@ -125,15 +167,24 @@ class Cell {
 
     private int x;
     private int y;
-    private int g;
+    private Double g;
     private int h;
-    private int f;
+    private Double f;
+    private int value;
 
     public Cell(int x, int y) {
         this.x = x;
         this.y = y;
-        this.g = Integer.MAX_VALUE;
-        this.f = Integer.MAX_VALUE;
+        this.g = Double.MAX_VALUE;
+        this.f = Double.MAX_VALUE;
+    }
+
+    public Cell(int x, int y, int value) {
+        this.x = x;
+        this.y = y;
+        this.g = Double.MAX_VALUE;
+        this.f = Double.MAX_VALUE;
+        this.value = value;
     }
 
     public int getX() {
@@ -152,11 +203,11 @@ class Cell {
         this.y = y;
     }
 
-    public int getG() {
+    public Double getG() {
         return g;
     }
 
-    public void setG(int g) {
+    public void setG(Double g) {
         this.g = g;
     }
 
@@ -168,12 +219,20 @@ class Cell {
         this.h = h;
     }
 
-    public int getF() {
+    public Double getF() {
         return f;
     }
 
-    public void setF(int f) {
+    public void setF(Double f) {
         this.f = f;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
     }
 
     @Override
