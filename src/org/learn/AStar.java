@@ -3,24 +3,6 @@ package org.learn;
 import java.util.*;
 
 public class AStar {
-    public static void main(String[] args) {
-        int grid[][] = {
-                {1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
-                {1, 1, 1, 0, 1, 1, 1, 0, 1, 1},
-                {1, 1, 1, 0, 1, 1, 0, 1, 0, 1},
-                {0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
-                {1, 1, 1, 0, 1, 1, 1, 0, 1, 0},
-                {1, 0, 1, 1, 1, 1, 0, 1, 0, 0},
-                {1, 0, 0, 0, 0, 1, 0, 0, 0, 1},
-                {1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 0, 0, 0, 1, 0, 0, 1}
-        };
-
-        Cell source = new Cell(0, 0);
-//        Cell destination = new Cell(8, 9);
-        Cell destination = new Cell(3, 2);
-        aStar(grid, source, destination);
-    }
 
     private static void aStar(int[][] grid, Cell source, Cell destination) {
         List<Cell> openList = new ArrayList<>();
@@ -88,6 +70,8 @@ public class AStar {
         if (cell.getY() + 1 < grid[cell.getX()].length) {
             newY = cell.getY() + 1;
         }
+        populateNeighbours(cell, neighbours, cell.getX(), newY, closedList, grid);
+        populateNeighbours(cell, neighbours, newX, cell.getY(), closedList, grid);
         populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
         newX = null;
         newY = null;
@@ -97,6 +81,8 @@ public class AStar {
         if (cell.getY() - 1 >= 0) {
             newY = cell.getY() - 1;
         }
+        populateNeighbours(cell, neighbours, cell.getX(), newY, closedList, grid);
+        populateNeighbours(cell, neighbours, newX, cell.getY(), closedList, grid);
         populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
         newX = null;
         newY = null;
@@ -106,6 +92,8 @@ public class AStar {
         if (cell.getY() - 1 >= 0) {
             newY = cell.getY() - 1;
         }
+        populateNeighbours(cell, neighbours, cell.getX(), newY, closedList, grid);
+        populateNeighbours(cell, neighbours, newX, cell.getY(), closedList, grid);
         populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
         newX = null;
         newY = null;
@@ -115,6 +103,8 @@ public class AStar {
         if (cell.getY() + 1 < grid[cell.getX()].length) {
             newY = cell.getY() + 1;
         }
+        populateNeighbours(cell, neighbours, cell.getX(), newY, closedList, grid);
+        populateNeighbours(cell, neighbours, newX, cell.getY(), closedList, grid);
         populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
         return neighbours;
     }
@@ -160,6 +150,25 @@ public class AStar {
 
     private static int heuristics(Cell source, Cell destination) {
         return (destination.getX() - source.getX()) + (destination.getY() - destination.getY());
+    }
+
+    public static void main(String[] args) {
+        int grid[][] = {
+                {1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
+                {1, 1, 1, 0, 1, 1, 1, 0, 1, 1},
+                {1, 1, 1, 0, 1, 1, 0, 1, 0, 1},
+                {0, 0, 1, 0, 1, 0, 0, 0, 0, 1},
+                {1, 1, 1, 0, 1, 1, 1, 0, 1, 0},
+                {1, 0, 1, 1, 1, 1, 0, 1, 0, 0},
+                {1, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+                {1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 0, 0, 0, 1, 0, 0, 1}
+        };
+
+        Cell source = new Cell(0, 0);
+        Cell destination = new Cell(8, 9);
+//        Cell destination = new Cell(3, 2);
+        aStar(grid, source, destination);
     }
 }
 
