@@ -7,11 +7,11 @@ public class AStar {
     private static void aStar(int[][] grid, Cell source, Cell destination) {
         List<Cell> openList = new ArrayList<>();
         List<Cell> closedList = new ArrayList<>();
-        openList.add(source);
         Map<Cell, Cell> cameFrom = new HashMap<>();
         source.setG(0d);
         source.setH(heuristics(source, destination));
         source.setF(source.getG() + source.getH());
+        openList.add(source);
         Cell current = null;
         while (!openList.isEmpty()) {
             current = findLowestFScoreFromOpenList(openList);
