@@ -4,35 +4,74 @@ import java.util.*;
 
 public class AStar {
 
+    /**
+     * A* is an informed search algorithm, or a best-first search used for path-finding problems.
+     * <p>
+     * Reference: https://en.wikipedia.org/wiki/A*_search_algorithm
+     *
+     * @param grid        - Grid of nodes to be traversed
+     * @param source      - Start node
+     * @param destination - End node
+     */
     private static void aStar(int[][] grid, Cell source, Cell destination) {
+
+        // Maintain an open list to process the currently found nodes
         List<Cell> openList = new ArrayList<>();
+
+        // The closed list maintains the visited nodes
         List<Cell> closedList = new ArrayList<>();
+
+        // The came-from list maintains a mapping between a node and the node from which this node was reached
         Map<Cell, Cell> cameFrom = new HashMap<>();
+
+        // G value is the distance travelled from source to this node
         source.setG(0d);
+
+        // H value is the estimated distance to destination from this node
         source.setH(heuristics(source, destination));
+
+        // F score is the sum of G and H, which will be the estimated total distance
         source.setF(source.getG() + source.getH());
+
+        // Start with adding the source to open list to be processed
         openList.add(source);
+
         Cell current = null;
+
+        // Loop until we have some node in open list
         while (!openList.isEmpty()) {
+
+            // From all nodes in open list, find the one which has the lowest F score and move to that node
             current = findLowestFScoreFromOpenList(openList);
+
             if (current.equals(destination)) {
-                //Reconstruct the path
-                String finalPath = printPath(cameFrom, current);
-                System.out.println("finalPath: " + finalPath);
+
+                // If the current node is the destination, reconstruct the travelled path
+                String finalPath = buildPath(cameFrom, current);
+                System.out.println("Path from " + source + " to " + destination + ": " + finalPath);
                 return;
             } else {
+
+                // If current node is not the destination, remove it from open list and add to closed list
                 openList.remove(current);
                 closedList.add(current);
-                //Find all neighbours of 'current'
+
+                // Find all unvisited (not present in closed list) neighbours of current node
                 List<Cell> neighbours = findUnvisitedNeighbours(current, grid, closedList);
                 for (Cell neighbour : neighbours) {
+
+                    // Find the distance from current to each neighbour
                     Double distance = distanceBetweenNeighbours(current, neighbour);
+
+                    // Choose the neighbours whose new G score is less than existing G score
                     Double tentativeGScore = current.getG() + distance;
                     if (tentativeGScore < neighbour.getG()) {
                         cameFrom.put(neighbour, current);
                         neighbour.setG(tentativeGScore);
                         neighbour.setF(neighbour.getG() + heuristics(neighbour, destination));
                         if (!openList.contains(neighbour)) {
+
+                            // Add the chosen neighbour to open list
                             openList.add(neighbour);
                         }
                     }
@@ -42,19 +81,24 @@ public class AStar {
         System.out.println("No path found");
     }
 
-    private static String printPath(Map<Cell, Cell> cameFrom, Cell current) {
-        String fullPath = "[" + current.getX() + ", " + current.getY() + "]";
+    private static String buildPath(Map<Cell, Cell> cameFrom, Cell current) {
+        StringBuilder pathBuilder = new StringBuilder("[" + current.getX() + ", " + current.getY() + "]");
+
+        // Traverse the path from current to source using came-from map
         while (cameFrom.containsKey(current)) {
             current = cameFrom.get(current);
-            fullPath = "[" + current.getX() + ", " + current.getY() + "]" + fullPath;
+
+            // Prepend each new value
+            pathBuilder.insert(0, "[" + current.getX() + ", " + current.getY() + "]");
         }
-        return fullPath;
+        return pathBuilder.toString();
     }
 
     private static Double distanceBetweenNeighbours(Cell current, Cell neighbour) {
-        Integer x = Math.abs(current.getX() - neighbour.getX());
-        Integer y = Math.abs(current.getY() - neighbour.getY());
+        int x = Math.abs(current.getX() - neighbour.getX());
+        int y = Math.abs(current.getY() - neighbour.getY());
         if (x == 1 && y == 1) {
+            // Diagonal distance using Pythagoras' theorem considering 1 each for horizontal and vertical distances
             return 1.4;
         } else {
             return 1d;
@@ -65,9 +109,11 @@ public class AStar {
         List<Cell> neighbours = new ArrayList<>();
         Integer newX = null, newY = null;
         if (cell.getX() + 1 < grid.length) {
+            // Proceed one node towards right
             newX = cell.getX() + 1;
         }
         if (cell.getY() + 1 < grid[cell.getX()].length) {
+            // Proceed one node towards bottom
             newY = cell.getY() + 1;
         }
         populateNeighbours(cell, neighbours, cell.getX(), newY, closedList, grid);
@@ -76,9 +122,11 @@ public class AStar {
         newX = null;
         newY = null;
         if (cell.getX() - 1 >= 0) {
+            // Proceed one node towards left
             newX = cell.getX() - 1;
         }
         if (cell.getY() - 1 >= 0) {
+            // Proceed one node towards top
             newY = cell.getY() - 1;
         }
         populateNeighbours(cell, neighbours, cell.getX(), newY, closedList, grid);
@@ -86,6 +134,7 @@ public class AStar {
         populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
         newX = null;
         newY = null;
+        // Proceed one node towards right-top
         if (cell.getX() + 1 < grid.length) {
             newX = cell.getX() + 1;
         }
@@ -97,6 +146,7 @@ public class AStar {
         populateNeighbours(cell, neighbours, newX, newY, closedList, grid);
         newX = null;
         newY = null;
+        // Proceed one node towards bottom-left
         if (cell.getX() - 1 >= 0) {
             newX = cell.getX() - 1;
         }
@@ -109,7 +159,8 @@ public class AStar {
         return neighbours;
     }
 
-    private static void populateNeighbours(Cell cell, List<Cell> neighbours, Integer newX, Integer newY, List<Cell> closedList, int[][] grid) {
+    private static void populateNeighbours(Cell cell, List<Cell> neighbours,
+                                           Integer newX, Integer newY, List<Cell> closedList, int[][] grid) {
         if (null != newX) {
             if (null != newY) {
                 Cell neighbour = new Cell(newX, newY, getGridValue(grid, newX, newY));
@@ -149,11 +200,12 @@ public class AStar {
     }
 
     private static int heuristics(Cell source, Cell destination) {
-        return (destination.getX() - source.getX()) + (destination.getY() - destination.getY());
+        // Heuristics using Manhattan distance
+        return (destination.getX() - source.getX()) + (destination.getY() - source.getY());
     }
 
     public static void main(String[] args) {
-        int grid[][] = {
+        int[][] grid = {
                 {1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
                 {1, 1, 1, 0, 1, 1, 1, 0, 1, 1},
                 {1, 1, 1, 0, 1, 1, 0, 1, 0, 1},
@@ -167,7 +219,6 @@ public class AStar {
 
         Cell source = new Cell(0, 0);
         Cell destination = new Cell(8, 9);
-//        Cell destination = new Cell(3, 2);
         aStar(grid, source, destination);
     }
 }
@@ -181,14 +232,15 @@ class Cell {
     private Double f;
     private int value;
 
-    public Cell(int x, int y) {
+    Cell(int x, int y) {
         this.x = x;
         this.y = y;
+        // Initialize each node with maximum G and F scores so that the first calculated scores will be a better value
         this.g = Double.MAX_VALUE;
         this.f = Double.MAX_VALUE;
     }
 
-    public Cell(int x, int y, int value) {
+    Cell(int x, int y, int value) {
         this.x = x;
         this.y = y;
         this.g = Double.MAX_VALUE;
@@ -196,51 +248,51 @@ class Cell {
         this.value = value;
     }
 
-    public int getX() {
+    int getX() {
         return x;
     }
 
-    public void setX(int x) {
+    void setX(int x) {
         this.x = x;
     }
 
-    public int getY() {
+    int getY() {
         return y;
     }
 
-    public void setY(int y) {
+    void setY(int y) {
         this.y = y;
     }
 
-    public Double getG() {
+    Double getG() {
         return g;
     }
 
-    public void setG(Double g) {
+    void setG(Double g) {
         this.g = g;
     }
 
-    public int getH() {
+    int getH() {
         return h;
     }
 
-    public void setH(int h) {
+    void setH(int h) {
         this.h = h;
     }
 
-    public Double getF() {
+    Double getF() {
         return f;
     }
 
-    public void setF(Double f) {
+    void setF(Double f) {
         this.f = f;
     }
 
-    public int getValue() {
+    int getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    void setValue(int value) {
         this.value = value;
     }
 
@@ -256,5 +308,10 @@ class Cell {
     @Override
     public int hashCode() {
         return Objects.hash(getX(), getY());
+    }
+
+    @Override
+    public String toString() {
+        return "{" + x + ", " + y + "}";
     }
 }
