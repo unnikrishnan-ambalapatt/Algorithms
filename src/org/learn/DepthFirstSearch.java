@@ -1,19 +1,43 @@
 package org.learn;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 
 public class DepthFirstSearch {
 
+    /**
+     * Depth-first search (DFS) is an algorithm for traversing or searching tree or graph data structures.
+     * <p>
+     * Reference: https://en.wikipedia.org/wiki/Depth-first_search
+     *
+     * @param root - Root node to start traversal
+     */
     private static void depthFirstSearch(Node root) {
+
+        // Use a first-in last-out data structure
         Deque<Node> stack = new LinkedList();
+
+        // Push the root node to stack
         stack.push(root);
         Node current = null;
+
+        // Loop until the stack is empty
         while (!stack.isEmpty()) {
+
+            // Pop the top-most node
             current = stack.pop();
+
+            // Check if it is visited: This is important in graphs as graphs can have loops
+            // If it is guaranteed to be tree, this check and the corresponding state can be avoided
             if (!current.isVisited()) {
                 current.setVisited(true);
+
+                // Print the newly visited node
                 current.print();
-                if(null != current.getChildren()) {
+                if (null != current.getChildren()) {
+                    // If current node has children, retrieve all of them and push them to stack
                     for (Node child : current.getChildren()) {
                         stack.push(child);
                     }
