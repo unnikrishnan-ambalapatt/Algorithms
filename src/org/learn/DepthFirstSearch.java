@@ -46,25 +46,50 @@ public class DepthFirstSearch {
         }
     }
 
-    public static void main(String[] args) {
-        int counter = 1;
-        Node root = new Node(1);
-        Node node11 = new Node(2);
-        Node node12 = new Node(3);
+    private static void depthFirstSearchRecursive(Node node) {
+
+        // Set the node as visited
+        node.setVisited(true);
+        node.print();
+
+        // If this node has children, iterate through all of them and for each, call this function again
+        if (null != node.getChildren()) {
+            for (Node n : node.getChildren()) {
+                if (!n.isVisited()) {
+                    depthFirstSearchRecursive(n);
+                }
+            }
+        }
+    }
+
+    private static Node populateGraph(int counter) {
+        Node root = new Node(counter++);
+        Node node11 = new Node(counter++);
+        Node node12 = new Node(counter++);
         List<Node> children1 = Arrays.asList(node11, node12);
         root.setChildren(children1);
 
-        Node node111 = new Node(4);
-        Node node112 = new Node(5);
+        Node node111 = new Node(counter++);
+        Node node112 = new Node(counter++);
         List<Node> children11 = Arrays.asList(node111, node112);
         node11.setChildren(children11);
 
-        Node node211 = new Node(6);
-        Node node212 = new Node(7);
+        Node node211 = new Node(counter++);
+        Node node212 = new Node(counter++);
         List<Node> children12 = Arrays.asList(node211, node212);
         node12.setChildren(children12);
+        return root;
+    }
 
+    public static void main(String[] args) {
+        int counter = 1;
+        Node root = populateGraph(counter);
+        System.out.println("---Iterative---");
         depthFirstSearch(root);
+        counter = 1;
+        Node rootForRecursive = populateGraph(counter);
+        System.out.println("---Recursive---");
+        depthFirstSearchRecursive(rootForRecursive);
 
     }
 }
