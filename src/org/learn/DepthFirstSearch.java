@@ -20,14 +20,14 @@ public class DepthFirstSearch {
         Deque<Node> stack = new LinkedList();
 
         // Push the root node to stack
-        stack.push(root);
+        stack.addLast(root);
         Node current = null;
 
         // Loop until the stack is empty
         while (!stack.isEmpty()) {
 
             // Pop the top-most node
-            current = stack.pop();
+            current = stack.pollFirst();
 
             // Check if it is visited: This is important in graphs as graphs can have loops
             // If it is guaranteed to be tree, this check and the corresponding state can be avoided
@@ -39,7 +39,7 @@ public class DepthFirstSearch {
                 if (null != current.getChildren()) {
                     // If current node has children, retrieve all of them and push them to stack
                     for (Node child : current.getChildren()) {
-                        stack.push(child);
+                        stack.addFirst(child);
                     }
                 }
             }
