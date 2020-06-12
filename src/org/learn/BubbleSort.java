@@ -1,5 +1,7 @@
 package org.learn;
 
+import java.util.Arrays;
+
 public class BubbleSort {
 
     enum SortOrder {
@@ -42,14 +44,10 @@ public class BubbleSort {
         Integer[] list = {33, 44, 56, 22, 566, 89, 2, 400, 22, 67};
         bubbleSort(list, SortOrder.ASC);
         System.out.println("Ascending: ");
-        for (Integer item : list) {
-            System.out.println(item);
-        }
+        System.out.println(Arrays.toString(list));
 
         bubbleSort(list, SortOrder.DESC);
         System.out.println("Descending: ");
-        for (Integer item : list) {
-            System.out.println(item);
-        }
+        System.out.println(Arrays.toString(list));
     }
 }
