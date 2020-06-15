@@ -15,16 +15,16 @@ public class CountingSort {
             sumSoFar += elemCount[i];
             elemCount[i] = sumSoFar;
         }
-        int[] sortedList = new int[arr.length];
-        for (int item : arr) {
-            sortedList[elemCount[item]] = item;
-            elemCount[item]++;
+        int[] sortedList = new int[max];
+        for (int i = arr.length - 1; i >= 0; i--) {
+            sortedList[elemCount[arr[i]] - 1] = arr[i];
+            elemCount[arr[i]]--;
         }
         return sortedList;
     }
 
     public static void main(String[] args) {
-        int[] arr = {34, 2, 54, 75, 7, 3, 75, 2, 6};
+        int[] arr = {8, 7, 6, 5, 4, 3, 2, 10, 9, 55, 66, 44, 3, 4, 66};
         arr = countingSort(arr, 75);
         System.out.println(Arrays.toString(arr));
     }
