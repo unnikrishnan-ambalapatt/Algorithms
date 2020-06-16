@@ -20,7 +20,7 @@ public class CountingSort {
             sortedList[elemCount[arr[i]] - 1] = arr[i];
             elemCount[arr[i]]--;
         }
-        return sortedList;
+        return Arrays.copyOfRange(sortedList, 0, arr.length);
     }
 
     public static void main(String[] args) {
